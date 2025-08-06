@@ -1,32 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../component/Navbar";
 import RateLimitedUI from "../component/RateLimitedUI";
-import { useEffect } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import NoteCard from "../component/NoteCard";
 import api from "../lib/axios";
 import NotesNotFound from "../component/NotesNotFound";
 
-const Home= () => {
-
+const Home = () => {
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let retryTimeout;
+
     const fetchNotes = async () => {
+      setLoading(true);  // reset loading on each fetch attempt
       try {
         const res = await api.get("/notes");
-        console.log("Raw response:", res);
-        console.log(res.data);
         setNotes(res.data);
         setIsRateLimited(false);
       } catch (error) {
-        console.log("Error fetching notes");
-        console.log(error.response);
         if (error.response?.status === 429) {
           setIsRateLimited(true);
+
+          // Retry automatically after 5 seconds
+          retryTimeout = setTimeout(() => {
+            fetchNotes();
+          }, 5000);
         } else {
           toast.error("Failed to load notes");
         }
@@ -34,27 +35,34 @@ const Home= () => {
         setLoading(false);
       }
     };
+
     fetchNotes();
+
+    // Cleanup retry timer on unmount
+    return () => clearTimeout(retryTimeout);
   }, []);
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      {isRateLimited && <RateLimitedUI/>}
+      {isRateLimited && <RateLimitedUI />}
       <div className="max-w-7xl mx-auto p-4 mt-6">
-      {loading && <div className="text-center text-purple-400 py-10">Loading notes...</div>}
-        {!loading && notes.length===0 && !isRateLimited && <NotesNotFound/>}
+        {loading && (
+          <div className="text-center text-purple-400 py-10">Loading notes...</div>
+        )}
+        {!loading && notes.length === 0 && !isRateLimited && <NotesNotFound />}
         {notes.length > 0 && !isRateLimited && (
           <div className="max-h-screen overflow-y-auto p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {notes.map((note) => (
-              <NoteCard key={note._id} note={note} setNotes={setNotes} />
-            ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {notes.map((note) => (
+                <NoteCard key={note._id} note={note} setNotes={setNotes} />
+              ))}
+            </div>
           </div>
-        </div> 
         )}
       </div>
     </div>
   );
-}
+};
+
 export default Home;
