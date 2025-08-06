@@ -4,7 +4,7 @@ import cors from "cors";
 import path from "path";
 import { connectDB } from "./config/db.js";
 import notesRoutes from "./routes/notesRoutes.js";
-import rateLimiter from "./middleware/rateLimiter.js";
+import rateLimiter from "./middleWare/rateLimiter.js"
 
 dotenv.config();
 const app = express();
