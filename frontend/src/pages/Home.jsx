@@ -15,7 +15,7 @@ const Home = () => {
     let retryTimeout;
 
     const fetchNotes = async () => {
-      setLoading(true);  // reset loading on each fetch attempt
+      setLoading(true); 
       try {
         const res = await api.get("/notes");
         setNotes(res.data);
@@ -23,8 +23,6 @@ const Home = () => {
       } catch (error) {
         if (error.response?.status === 429) {
           setIsRateLimited(true);
-
-          // Retry automatically after 5 seconds
           retryTimeout = setTimeout(() => {
             fetchNotes();
           }, 5000);
@@ -37,8 +35,6 @@ const Home = () => {
     };
 
     fetchNotes();
-
-    // Cleanup retry timer on unmount
     return () => clearTimeout(retryTimeout);
   }, []);
 
