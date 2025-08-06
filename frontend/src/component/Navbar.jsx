@@ -12,7 +12,7 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             <Link
               to={"/create"}
-              className="btn bg-[#873fb4] hover:bg-[#613494] text-white border-none shadow-md shadow-[#9b5de5]/50">
+              className="btn bg-[7642c0] hover:bg-[#613494] text-white border-none shadow-md shadow-[#9b5de5]/50">
               <PlusIcon className="size-6" />
               <span>New Note</span>
             </Link>
